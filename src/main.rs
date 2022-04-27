@@ -1,7 +1,7 @@
 use self_update::cargo_crate_version;
 
 fn main() {
-    update().expect_err("Program updated, please restart the program!");
+    update().unwrap_err();
     println!(
         "Thanks for downloading this program! Version ({})",
         cargo_crate_version!()
