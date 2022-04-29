@@ -19,7 +19,7 @@ fn try_update() -> Result<(), Box<dyn std::error::Error>> {
         .build();
 
     let update_result = match update_system_build_result {
-        Ok(update_system) => update_system.update(),
+        Ok(update_system) => update_system.update_extended(),
         Err(e) => {
             panic!("Failed to build update system! ({})", e);
         }
@@ -27,7 +27,12 @@ fn try_update() -> Result<(), Box<dyn std::error::Error>> {
 
     match update_result {
         // If update_result is Ok, then the updater updated the program
-        Ok(_) => return Ok(()),
+        Ok(update_status) => match update_status {
+            self_update::update::UpdateStatus::UpToDate => {
+                Err("Program already up to date.".into())
+            }
+            self_update::update::UpdateStatus::Updated(_) => Ok(()),
+        },
         Err(e) => {
             // Update Errors are allowed because they mean the user decided not to update
             match e {
@@ -35,7 +40,7 @@ fn try_update() -> Result<(), Box<dyn std::error::Error>> {
                 _ => panic!("Updater failed! ({})", e),
             }
 
-            return Err("Program did not update.".into());
+            Err("Program did not update.".into())
         }
     }
 }
